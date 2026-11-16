@@ -4,6 +4,9 @@ import { AppError } from './shared/errors'
 
 export const app = express()
 app.use(express.json())
+app.get('/api/health', (_req, res) => {
+    res.json({ status: 'ok', service: 'eventpass-api' })
+})
 app.use('/api', ApiRouter)
 
 // Temporal hasta que Dev 2 entregue el middleware oficial 

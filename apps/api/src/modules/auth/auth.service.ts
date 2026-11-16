@@ -26,7 +26,7 @@ export async function registerUser(input: RegisterInput) {
 
     await auth.setCustomUserClaims(uid, { role });
 
-    const profile = { uid, name, email, role, createAt: new Date().toISOString() };
+    const profile = { uid, name, email, role, createdAt: new Date().toISOString() };
     await db.collection('users').doc(uid).set(profile);
 
     return profile

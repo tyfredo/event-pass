@@ -1,8 +1,7 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import 'dotenv/config';
 import { auth, db } from '../config/firebase';
 
-const DEV_PROJECT = 'event-pass-dev';
+const DEV_PROJECT = 'event-pass-511ff';
 if (process.env.FIREBASE_PROJECT_ID !== DEV_PROJECT) {
     console.error(`Seed bloqueado: FIREBASE_PROJECT_ID es "${process.env.FIREBASE_PROJECT_ID}", solo se permite "${DEV_PROJECT}".`);
     process.exit(1);

@@ -1,6 +1,6 @@
-import dotenv from 'dotenv'
-dotenv.config()
-import { app } from './app'
+// apps/api/src/server.ts
+import 'dotenv/config';
+import { app } from './app';
 
 const PORT = Number(process.env.PORT) || 4000;
 
