@@ -1,27 +1,30 @@
+import cors from 'cors'
 import express from 'express'
-import { ApiRouter } from './routes'
-import { AppError } from './shared/errors'
+import { authRouter } from './modules/auth/auth.routes.js'
+import {
+  eventRegistrationRouter,
+  registrationRouter,
+} from './modules/registrations/registration.routes.js'
+import { errorMiddleware } from './shared/middleware/error.middleware.js'
 
-export const app = express()
-app.use(express.json())
-app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', service: 'eventpass-api' })
-})
-app.use('/api', ApiRouter)
+export const createApp = () => {
+  const app = express()
 
-// Temporal hasta que Dev 2 entregue el middleware oficial 
-app.use((err: unknown, _req: any, res: any, _next: any) => {
-    if (err instanceof AppError) {
-        return res.status(err.status).json({
-            code: err.code,
-            message: err.message
-        })
-    }
-    console.error(err);
-    res.status(500).json({
-        error: {
-            code: 'INTERNAL_ERROR',
-            message: 'Error interno'
-        }
-    })
-})
+  app.use(cors({ origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000' }))
+  app.use(express.json())
+
+  app.get('/api/health', (_request, response) => {
+    response.json({ status: 'ok', service: 'eventpass-api' })
+  })
+
+  app.use('/api/auth', authRouter)
+  app.use('/api/registrations', registrationRouter)
+  app.use('/api/events', eventRegistrationRouter)
+
+  app.use((_request, response) => {
+    response.status(404).json({ message: 'Route not found' })
+  })
+  app.use(errorMiddleware)
+
+  return app
+}

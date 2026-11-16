@@ -1,7 +1,9 @@
-// apps/api/src/server.ts
-import 'dotenv/config';
-import { app } from './app';
+import 'dotenv/config'
+import { createApp } from './app.js'
 
-const PORT = Number(process.env.PORT) || 4000;
+const PORT = Number(process.env.PORT) || 4000
+const app = createApp()
 
-app.listen(PORT, () => console.log(`API en http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`EventPass API running on http://localhost:${PORT}`)
+})
