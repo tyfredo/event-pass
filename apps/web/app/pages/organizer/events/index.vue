@@ -19,7 +19,7 @@ async function handleToggleStatus(event: EventItem) {
 }
 
 onMounted(loadMyEvents);
-watch([() => auth.currentProfileKey, () => eventsStore.useMockMode], loadMyEvents);
+watch(() => auth.user?.uid, loadMyEvents);
 </script>
 
 <template>
@@ -28,7 +28,7 @@ watch([() => auth.currentProfileKey, () => eventsStore.useMockMode], loadMyEvent
       <div>
         <h1 class="text-2xl font-bold text-slate-900">Mis Eventos</h1>
         <p class="text-sm text-slate-600">
-          Gestionando eventos de <strong>{{ auth.currentUser.name }}</strong>
+          Gestionando eventos de <strong>{{ auth.user?.name ?? 'Organizador' }}</strong>
         </p>
       </div>
 

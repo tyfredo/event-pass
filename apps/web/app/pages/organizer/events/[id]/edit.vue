@@ -11,11 +11,9 @@ definePageMeta({ middleware: 'organizer' });
 const route = useRoute();
 const auth = useAuthStore();
 const eventsStore = useEventsStore();
-
+const { currentEvent: current } = storeToRefs(eventsStore);
 const eventId = computed(() => String(route.params.id));
-const current = computed(() => eventsStore.currentEvent);
-const isOwner = computed(() => current.value?.organizerId === auth.currentUser.id);
-
+const isOwner = computed(() => current.value?.organizerId === auth.user?.uid);
 // `ready` evita pintar "no encontrado" antes de que termine la primera carga (también en SSR).
 const ready = ref(false);
 const validationError = ref<string | null>(null);
@@ -46,7 +44,7 @@ async function loadEvent() {
 }
 
 onMounted(loadEvent);
-watch([eventId, () => eventsStore.useMockMode], loadEvent);
+watch(eventId, loadEvent);
 
 async function handleSubmit() {
   const event = current.value;

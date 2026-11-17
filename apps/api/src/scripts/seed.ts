@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { auth, db } from '../config/firebase';
+import { auth, db } from '../config/firebase.js';
 
 const DEV_PROJECT = 'event-pass-511ff';
 if (process.env.FIREBASE_PROJECT_ID !== DEV_PROJECT) {

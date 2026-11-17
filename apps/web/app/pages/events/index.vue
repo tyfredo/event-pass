@@ -20,7 +20,7 @@ async function loadEvents() {
 }
 
 onMounted(loadEvents);
-watch([selectedFilter, () => eventsStore.useMockMode], loadEvents);
+watch(selectedFilter, loadEvents);
 </script>
 
 <template>

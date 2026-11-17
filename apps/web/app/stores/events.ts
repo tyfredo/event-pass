@@ -3,9 +3,7 @@ import { defineStore } from 'pinia';
 import { useAuthStore } from '~/stores/auth';
 import {
   createHttpEventsApi,
-  createMockEventsApi,
   EventsApiError,
-  type EventsApi,
 } from '~/services/events-api';
 import type {
   CreateEventPayload,
@@ -37,7 +35,6 @@ export const useEventsStore = defineStore('events', () => {
   const auth = useAuthStore();
   const config = useRuntimeConfig();
 
-  const useMockMode = ref(false);
   const events = ref<EventItem[]>([]);
   const myEvents = ref<EventItem[]>([]);
   const currentEvent = ref<EventItem | null>(null);
@@ -49,30 +46,26 @@ export const useEventsStore = defineStore('events', () => {
   const loaded = reactive({ list: false, mine: false });
   const pendingStatusId = ref<string | null>(null);
 
-  const httpApi = createHttpEventsApi({
+  const api = createHttpEventsApi({
     baseUrl: () => String(config.public.apiBase),
-    authHeader: () => auth.authHeader,
+    authHeader: async (): Promise<Record<string, string>> => {
+      const token = await auth.getToken();
+      if (!token) return {};
+      return { Authorization: `Bearer ${token}` };
+    },
   });
-  const mockApi = createMockEventsApi(() => auth.currentUser);
-  const api = (): EventsApi => (useMockMode.value ? mockApi : httpApi);
 
   // Contadores de petición: solo la última respuesta puede escribir en el estado.
   let listSeq = 0;
   let mineSeq = 0;
   let detailSeq = 0;
 
-  function toggleMockMode(enabled?: boolean): void {
-    useMockMode.value = enabled ?? !useMockMode.value;
-    error.value = null;
-    currentEvent.value = null;
-  }
-
   async function fetchEvents(status?: EventStatus): Promise<void> {
     const seq = ++listSeq;
     loading.list = true;
     error.value = null;
     try {
-      const data = await api().list(status);
+      const data = await api.list(status);
       if (seq === listSeq) events.value = data;
     } catch (err) {
       if (seq === listSeq) error.value = toMessage(err);
@@ -90,7 +83,7 @@ export const useEventsStore = defineStore('events', () => {
     error.value = null;
     currentEvent.value = null;
     try {
-      const data = await api().getById(id);
+      const data = await api.getById(id);
       if (seq === detailSeq) currentEvent.value = data;
       return seq === detailSeq ? data : null;
     } catch (err) {
@@ -115,7 +108,7 @@ export const useEventsStore = defineStore('events', () => {
 
     loading.mine = true;
     try {
-      const data = await api().listMine();
+      const data = await api.listMine();
       if (seq === mineSeq) myEvents.value = data;
     } catch (err) {
       if (seq === mineSeq) error.value = toMessage(err);
@@ -131,7 +124,7 @@ export const useEventsStore = defineStore('events', () => {
     loading.saving = true;
     error.value = null;
     try {
-      const created = await api().create(payload);
+      const created = await api.create(payload);
       myEvents.value = [created, ...myEvents.value];
       return created;
     } catch (err) {
@@ -146,7 +139,7 @@ export const useEventsStore = defineStore('events', () => {
     loading.saving = true;
     error.value = null;
     try {
-      const updated = await api().update(id, payload);
+      const updated = await api.update(id, payload);
       currentEvent.value = updated;
       replaceById(myEvents, updated);
       replaceById(events, updated);
@@ -163,7 +156,7 @@ export const useEventsStore = defineStore('events', () => {
     pendingStatusId.value = id;
     error.value = null;
     try {
-      const updated = await api().setStatus(id, newStatus);
+      const updated = await api.setStatus(id, newStatus);
       replaceById(myEvents, updated);
       replaceById(events, updated);
       if (currentEvent.value?.id === id) currentEvent.value = updated;
@@ -178,7 +171,6 @@ export const useEventsStore = defineStore('events', () => {
 
   return {
     // estado
-    useMockMode,
     events,
     myEvents,
     currentEvent,
@@ -187,7 +179,6 @@ export const useEventsStore = defineStore('events', () => {
     loaded,
     pendingStatusId,
     // acciones
-    toggleMockMode,
     fetchEvents,
     fetchEventById,
     fetchMyEvents,

@@ -1,5 +1,5 @@
-import { auth, db } from '../../config/firebase'
-import { AppError } from '../../shared/errors'
+import { auth, db } from '../../config/firebase.js'
+import { AppError } from '../../shared/errors.js'
 import type { RegisterInput } from './auth.schema.ts'
 
 

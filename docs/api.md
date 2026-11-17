@@ -31,7 +31,7 @@ Rutas protegidas: header `Authorization: Bearer <token de Firebase>` (en desarro
 }
 ```
 
-Errores (`{ "message": "CODIGO" }`):
+Errores (`{ "message": "CODIGO" `):
 
 | Código | HTTP | Cuándo |
 |---|---|---|

@@ -43,19 +43,4 @@ export interface SelectOption {
   disabled?: boolean
 }
 
-export type EventStatus = 'open' | 'closed'
 
-export interface EventItem {
-  id: string
-  organizerId: string
-  title: string
-  description: string
-  location: string
-  capacity: number
-  registeredCount: number
-  availableSeats: number
-  status: EventStatus
-  startsAt: string
-  createdAt: string
-  updatedAt: string
-}

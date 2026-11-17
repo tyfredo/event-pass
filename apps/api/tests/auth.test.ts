@@ -21,9 +21,9 @@ vi.mock('../src/config/firebase', () => ({
     },
 }));
 
-import { authRouter } from '../src/modules/auth/auth.routes';
-import { requireAuth, requireRole } from '../src/shared/middleware/auth';
-import { AppError } from '../src/shared/errors';
+import { authRouter } from '../src/modules/auth/auth.routes.js';
+import { requireAuth, requireRole } from '../src/shared/middleware/auth.js';
+import { AppError } from '../src/shared/errors.js';
 
 function buildApp() {
     const app = express();

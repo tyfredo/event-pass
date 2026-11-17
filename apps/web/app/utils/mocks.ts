@@ -1,11 +1,10 @@
 import type {
   ApiRequestOptions,
-  EventItem,
-  EventStatus,
   RegisterPayload,
   Role,
   UserProfile,
 } from '~/types'
+import type { EventItem, EventStatus } from '~/types/events'
 import type { Registration } from '~/types/registration'
 import { ApiRequestError } from '~/utils/apiErrors'
 
