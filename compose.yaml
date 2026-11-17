@@ -1,0 +1,38 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    ports:
+      - "3000:3000" 
+    volumes:
+      - .:/app 
+    environment:
+      - NUXT_PUBLIC_API_BASE=http://localhost:3001/api
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./api:/app/api
+    environment:
+      - PORT=3001
+      - CORS_ORIGIN=http://localhost:3000
+      - FIRESTORE_EMULATOR_HOST=firebase-emulators:8080
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulators:9099
+
+  firebase-emulators:
+    image: node:24-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "9099:9099" 
+      - "8080:8080" 
+      - "4000:4000" 
+    command: >
+      sh -c "npm install -g firebase-tools && 
+             firebase emulators:start --project demo-eventpass"

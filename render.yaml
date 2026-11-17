@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: eventpass-api
+    env: docker
+    dockerfilePath: ./docker/api.Dockerfile
+    branch: main
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: CORS_ORIGIN
+        sync: false
+      - key: ORGANIZER_CODE
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
