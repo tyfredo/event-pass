@@ -1,6 +1,9 @@
 # EventPass API
 
-Base local: `http://localhost:4000/api` · Rutas protegidas: header `Authorization: Bearer <token de Firebase>`.
+Base local: `http://localhost:4000/api` · Formato: `application/json`  
+Rutas protegidas: header `Authorization: Bearer <token de Firebase>` (en desarrollo también admite tokens *mock*).
+
+---
 
 ## Inscripciones
 
@@ -37,3 +40,14 @@ Errores (`{ "message": "CODIGO" }`):
 | `EVENT_FULL` | 409 | Ya no hay lugares |
 | `ALREADY_REGISTERED` | 409 | Ya está inscrito a ese evento |
 | `NOT_EVENT_OWNER` | 403 | El organizador no es dueño del evento |
+
+---
+
+## Módulo de Eventos
+
+### Autenticación y Roles
+
+Los endpoints protegidos requieren el encabezado HTTP `Authorization`:
+
+```http
+Authorization: Bearer <token>
