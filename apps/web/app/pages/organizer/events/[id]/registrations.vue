@@ -1,4 +1,6 @@
 <script setup lang="ts">
+definePageMeta({ middleware: 'organizer' })
+
 const route = useRoute()
 const eventId = String(route.params.id)
 const { listByEvent } = useRegistrations()

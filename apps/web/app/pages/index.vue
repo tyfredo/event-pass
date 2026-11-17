@@ -1,3 +1,15 @@
+<script setup lang="ts">
+definePageMeta({
+  middleware: async () => {
+    const auth = await resolveSession()
+    if (!auth) return
+    return navigateTo(homeForRole(auth.role), { replace: true })
+  },
+})
+</script>
+
 <template>
-  <h1 class="p-8 text-3xl font-bold text-indigo-600">EventPass</h1>
+  <div class="flex min-h-[50vh] items-center justify-center text-indigo-600">
+    <UiSpinner size="lg" />
+  </div>
 </template>

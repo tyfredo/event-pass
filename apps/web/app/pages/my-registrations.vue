@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import RegistrationCard from '~/components/registrations/RegistrationCard.vue'
 
+definePageMeta({ middleware: 'attendee' })
+
 const { listMine } = useRegistrations()
 
 const { data: registrations, error } = useAsyncData('my-registrations', listMine, {
