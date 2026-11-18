@@ -2,9 +2,11 @@
 import { onMounted, ref, watch } from 'vue';
 import EventCard from '~/components/events/EventCard.vue';
 import { useEventsStore } from '~/stores/events';
+import { useAuthStore } from '~/stores/auth';
 import type { EventStatus } from '~/types/events';
 
 const eventsStore = useEventsStore();
+const auth = useAuthStore();
 const route = useRoute();
 
 type Filter = 'all' | EventStatus;
@@ -73,7 +75,16 @@ watch(selectedFilter, loadEvents);
     </div>
 
     <div v-else-if="eventsStore.events.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <EventCard v-for="evt in eventsStore.events" :key="evt.id" :event="evt" />
+      <EventCard v-for="evt in eventsStore.events" :key="evt.id" :event="evt">
+        <template v-if="!auth.isOrganizer && evt.status === 'open' && evt.availableSeats > 0" #actions>
+          <NuxtLink
+            :to="`/events/${evt.id}`"
+            class="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-indigo-700"
+          >
+            Inscribirme
+          </NuxtLink>
+        </template>
+      </EventCard>
     </div>
 
     <div
