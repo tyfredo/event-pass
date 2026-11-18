@@ -15,7 +15,7 @@
     "dev:api": "npm run dev -w @eventpass/api",
     "dev:web": "npm run dev -w @eventpass/web",
     "build": "npm run build -w @eventpass/api && npm run build -w @eventpass/web",
-    "test": "npm run test -w @eventpass/api"
+    "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {
     "concurrently": "^10.0.7"

@@ -1,10 +1,9 @@
-import express from "express";
+import 'dotenv/config'
+import { createApp } from './app.js'
 
-const app = express();
-const PORT = Number(process.env.PORT) || 4000;
+const PORT = Number(process.env.PORT) || 4000
+const app = createApp()
 
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", service: "eventpass-api" });
-});
-
-app.listen(PORT, () => console.log(`API en http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`EventPass API running on http://localhost:${PORT}`)
+})
