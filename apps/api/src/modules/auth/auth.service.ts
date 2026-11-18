@@ -4,11 +4,11 @@ import type { RegisterInput } from './auth.schema.ts'
 
 
 export async function registerUser(input: RegisterInput) {
-    const { name, email, password, role, origanizerCode } = input;
+    const { name, email, password, role, organizerCode } = input;
 
     if (role === 'organizer') {
         const expected = process.env.ORGANIZER_CODE;
-        if (!expected || origanizerCode !== expected) {
+        if (!expected || organizerCode !== expected) {
             throw new AppError(403, 'INVALID_ORGANIZER_CODE', 'Código de organizador inválido');
         }
     }
