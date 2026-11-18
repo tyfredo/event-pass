@@ -35,15 +35,17 @@ async function upsertUser(u: (typeof users)[number]) {
 }
 
 async function main() {
-    for (const u of users) await upsertUser(u);
+    const uids: string[] = [];
+    for (const u of users) uids.push(await upsertUser(u));
+    const [org1, org2] = uids;
 
     const events = [
-        { id: 'evt-abierto', title: 'Congreso de Cómputo en la Nube', description: 'Charlas y talleres.', date: inDays(14), location: 'Auditorio A', capacity: 100, registeredCount: 2, status: 'open' },
-        { id: 'evt-casi-lleno', title: 'Taller de Docker', description: 'Cupo muy limitado.', date: inDays(7), location: 'Laboratorio 3', capacity: 3, registeredCount: 2, status: 'open' },
-        { id: 'evt-cerrado', title: 'Hackathon pasado', description: 'Inscripciones cerradas.', date: inDays(-10), location: 'Gimnasio', capacity: 50, registeredCount: 0, status: 'closed' },
+        { id: 'evt-abierto', title: 'Congreso de Cómputo en la Nube', description: 'Charlas y talleres.', organizerId: org1, startsAt: inDays(14), location: 'Auditorio A', capacity: 100, registeredCount: 2, status: 'open' },
+        { id: 'evt-casi-lleno', title: 'Taller de Docker', description: 'Cupo muy limitado.', organizerId: org1, startsAt: inDays(7), location: 'Laboratorio 3', capacity: 3, registeredCount: 2, status: 'open' },
+        { id: 'evt-cerrado', title: 'Hackathon pasado', description: 'Inscripciones cerradas.', organizerId: org2, startsAt: inDays(-10), location: 'Gimnasio', capacity: 50, registeredCount: 0, status: 'closed' },
     ];
     for (const { id, ...e } of events) {
-        await db.collection('events').doc(id).set({ ...e, createdAt: now });
+        await db.collection('events').doc(id).set({ ...e, createdAt: now, updatedAt: now });
     }
 
     const regs = [

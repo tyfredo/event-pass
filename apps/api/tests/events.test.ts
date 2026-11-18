@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app.js';
-import { eventsRepository } from '../src/modules/events/events.repository.js';
+import { memoryEventsRepository as eventsRepository } from '../src/modules/events/events.repository.js';
 
 const ORG_A_TOKEN = 'Bearer mock-organizer-a';
 const ORG_B_TOKEN = 'Bearer mock-organizer-b';

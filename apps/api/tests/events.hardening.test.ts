@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app.js';
-import { eventsRepository } from '../src/modules/events/events.repository.js';
+import { memoryEventsRepository as eventsRepository } from '../src/modules/events/events.repository.js';
 
 const ORG_A = 'Bearer mock-organizer-a';
 const futureIso = (days = 10): string => new Date(Date.now() + days * 86_400_000).toISOString();

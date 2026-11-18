@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import type { DocumentSnapshot } from 'firebase-admin/firestore';
+import { db } from '../../config/firebase.js';
 import type { EventEntity, EventStatus } from './events.schema.js';
 
 export type NewEventData = Omit<EventEntity, 'id' | 'createdAt' | 'updatedAt'>;
@@ -128,4 +130,53 @@ export class InMemoryEventsRepository implements EventsRepository {
   }
 }
 
-export const eventsRepository = new InMemoryEventsRepository(true);
+export class FirestoreEventsRepository implements EventsRepository {
+  private collection = db.collection('events');
+
+  private toEntity(doc: DocumentSnapshot): EventEntity {
+    return { id: doc.id, ...doc.data() } as EventEntity;
+  }
+
+  public async create(data: NewEventData): Promise<EventEntity> {
+    const now = new Date().toISOString();
+    const ref = this.collection.doc();
+    const newEvent = { ...data, createdAt: now, updatedAt: now };
+    await ref.set(newEvent);
+    return { id: ref.id, ...newEvent };
+  }
+
+  public async findAll(filter?: { status?: EventStatus }): Promise<EventEntity[]> {
+    const query = filter?.status ? this.collection.where('status', '==', filter.status) : this.collection;
+    const snap = await query.get();
+    return snap.docs
+      .map((doc) => this.toEntity(doc))
+      .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
+  }
+
+  public async findById(id: string): Promise<EventEntity | null> {
+    const doc = await this.collection.doc(id).get();
+    return doc.exists ? this.toEntity(doc) : null;
+  }
+
+  public async findByOrganizerId(organizerId: string): Promise<EventEntity[]> {
+    const snap = await this.collection.where('organizerId', '==', organizerId).get();
+    return snap.docs
+      .map((doc) => this.toEntity(doc))
+      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  }
+
+  public async update(id: string, data: EventPatch): Promise<EventEntity | null> {
+    const ref = this.collection.doc(id);
+    if (!(await ref.get()).exists) return null;
+
+    const changes = Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined));
+    await ref.update({ ...changes, updatedAt: new Date().toISOString() });
+    return this.toEntity(await ref.get());
+  }
+}
+
+// Las pruebas usan memoria para no escribir en Firestore.
+export const memoryEventsRepository = new InMemoryEventsRepository(true);
+export const eventsRepository: EventsRepository = process.env.VITEST
+  ? memoryEventsRepository
+  : new FirestoreEventsRepository();
