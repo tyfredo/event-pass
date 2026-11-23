@@ -8,9 +8,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (!auth.isOrganizer) {
-    return navigateTo({
-      path: homeForRole(auth.role),
-      query: { unauthorized: '1' },
-    });
+    return navigateTo(homeForRole(auth.role));
   }
 });

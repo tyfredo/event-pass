@@ -1,0 +1,9 @@
+# Configuración para despliegue del frontend Nuxt (apps/web) en Netlify
+[build]
+  command = "npm run build -w @eventpass/web"
+  publish = "apps/web/.output/public"
+
+[build.environment]
+  NODE_VERSION = "24"
+  # Opcional: si deseas forzar el preset de Nitro para Netlify
+  NITRO_PRESET = "netlify"
