@@ -1,6 +1,5 @@
 import { Router } from 'express'
-import { requireAuth } from '../../shared/middleware/auth.middleware.js'
-import { requireRole } from '../../shared/middleware/role.middleware.js'
+import { requireAuth, requireRole } from '../../shared/middleware/auth.js'
 import {
   createRegistration,
   getPass,

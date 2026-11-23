@@ -7,7 +7,6 @@ import {
   registrationRouter,
 } from './modules/registrations/registration.routes.js'
 import { AppError } from './shared/errors.js'
-import { errorMiddleware } from './shared/middleware/error.middleware.js'
 import { errorHandler } from './shared/middleware/errorHandler.js'
 
 export const createApp = () => {
@@ -36,9 +35,9 @@ export const createApp = () => {
   })
 
   app.use(errorHandler)
-  app.use(errorMiddleware)
 
   return app
 }
 
-export const app = createApp();
+export const app = createApp()
+export default app // Agregado para que no falle tu server.ts al importarlo

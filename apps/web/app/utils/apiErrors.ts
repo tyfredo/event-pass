@@ -8,6 +8,7 @@ const apiErrorMessages: Record<string, string> = {
   USER_NOT_FOUND: 'No se encontró tu perfil.',
   UNAUTHENTICATED: 'Debes iniciar sesión.',
   Unauthorized: 'Debes iniciar sesión.',
+  UNAUTHORIZED: 'Debes iniciar sesión.',
   INVALID_TOKEN: 'Tu sesión expiró, vuelve a iniciar sesión.',
   'Invalid or expired token': 'Tu sesión expiró, vuelve a iniciar sesión.',
   FORBIDDEN: 'Tu rol no tiene permiso para esta acción.',
@@ -20,7 +21,12 @@ const apiErrorMessages: Record<string, string> = {
   REGISTRATION_NOT_FOUND: 'La inscripción no existe.',
   NOT_REGISTRATION_OWNER: 'Solo puedes cancelar tus propias inscripciones.',
   CAPACITY_BELOW_REGISTERED: 'El aforo no puede ser menor que el número de inscritos.',
+  INVALID_CAPACITY: 'El aforo no puede ser menor que el número de inscritos.',
+  INVALID_JSON: 'El cuerpo de la petición no es un JSON válido.',
+  PAYLOAD_TOO_LARGE: 'El cuerpo de la petición es demasiado grande.',
+  NOT_FOUND: 'El recurso solicitado no existe.',
   'Route not found': 'El recurso solicitado no existe.',
+  INTERNAL_SERVER_ERROR: 'Ocurrió un error en el servidor, intenta más tarde.',
   'Internal server error': 'Ocurrió un error en el servidor, intenta más tarde.',
   NETWORK_ERROR: 'No se pudo conectar con el servidor.',
 }
@@ -32,12 +38,12 @@ export class ApiRequestError extends Error {
   readonly code: string
   readonly data: ApiErrorBody
 
-  constructor(statusCode: number, code: string) {
+  constructor(statusCode: number, code: string, data?: ApiErrorBody) {
     super(apiErrorMessages[code] ?? fallbackMessage)
     this.name = 'ApiRequestError'
     this.statusCode = statusCode
     this.code = code
-    this.data = { message: code }
+    this.data = data ?? { message: code }
   }
 }
 
@@ -50,9 +56,16 @@ export function toApiRequestError(error: unknown): ApiRequestError {
     return error
   }
 
-  const fetchError = error as { statusCode?: number; data?: Partial<ApiErrorBody> } | null
-  const statusCode = fetchError?.statusCode ?? 0
-  const code = fetchError?.data?.message ?? (statusCode === 0 ? 'NETWORK_ERROR' : '')
+  const fetchError = error as {
+    statusCode?: number
+    data?: ApiErrorBody
+  } | null
 
-  return new ApiRequestError(statusCode, code)
+  const statusCode = fetchError?.statusCode ?? 0
+  const code =
+    fetchError?.data?.error?.code ??
+    fetchError?.data?.message ??
+    (statusCode === 0 ? 'NETWORK_ERROR' : '')
+
+  return new ApiRequestError(statusCode, code, fetchError?.data)
 }

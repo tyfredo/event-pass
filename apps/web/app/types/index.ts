@@ -26,7 +26,12 @@ export interface ApiResponse<T> {
 }
 
 export interface ApiErrorBody {
-  message: string
+  message?: string
+  error?: {
+    code?: string
+    message?: string
+    details?: unknown
+  }
 }
 
 export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'

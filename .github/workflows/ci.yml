@@ -1,0 +1,35 @@
+name: Integración Continua (CI)
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Instalar dependencias (API)
+        working-directory: ./api
+        run: npm ci
+
+      - name: Verificación de tipos (Typecheck)
+        working-directory: ./api
+        run: npm run typecheck --if-present
+
+      - name: Pruebas unitarias
+        working-directory: ./api
+        run: npm test --if-present
+
+      - name: Construir proyecto (Build)
+        working-directory: ./api
+        run: npm run build --if-present

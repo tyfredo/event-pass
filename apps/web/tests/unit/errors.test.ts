@@ -13,6 +13,20 @@ describe('errores de la API', () => {
     expect(error.data).toEqual({ message: 'EVENT_FULL' })
   })
 
+  it('traduce un error con el formato { error: { code: CODIGO } }', () => {
+    const error = toApiRequestError({ statusCode: 400, data: { error: { code: 'INVALID_CAPACITY' } } })
+    expect(error).toBeInstanceOf(ApiRequestError)
+    expect(error.statusCode).toBe(400)
+    expect(error.code).toBe('INVALID_CAPACITY')
+    expect(error.message).toBe('El aforo no puede ser menor que el número de inscritos.')
+  })
+
+  it('traduce errores nuevos de la API como UNAUTHORIZED, INVALID_JSON y NOT_FOUND', () => {
+    expect(translateApiError('UNAUTHORIZED')).toBe('Debes iniciar sesión.')
+    expect(translateApiError('INVALID_JSON')).toBe('El cuerpo de la petición no es un JSON válido.')
+    expect(translateApiError('NOT_FOUND')).toBe('El recurso solicitado no existe.')
+  })
+
   it('reconoce cuando no hay conexión con el servidor', () => {
     expect(toApiRequestError(new TypeError('fetch failed')).message).toBe('No se pudo conectar con el servidor.')
   })
