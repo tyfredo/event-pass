@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+@media print {
+  /* Menú principal y botones: solo se imprime el boleto. */
+  header:has(> nav),
+  .no-print {
+    display: none !important;
+  }
+}
