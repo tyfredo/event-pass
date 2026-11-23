@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import type { EventForRegistration } from './registration.types.js'
-
+import { AppError } from '../../shared/errors.js'
 
 export const checkCanRegister = (
   event: EventForRegistration | null,
@@ -16,4 +16,10 @@ export const checkCanRegister = (
 export const generateFolio = () => {
   const code = randomBytes(3).toString('hex').toUpperCase()
   return `EVP-${new Date().getFullYear()}-${code}`
+}
+
+export function assertOwner(registration: { attendeeId: string }, uid: string) {
+  if (registration.attendeeId !== uid) {
+    throw AppError.forbidden('Esta inscripción no te pertenece', 'NOT_REGISTRATION_OWNER')
+  }
 }

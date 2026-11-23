@@ -24,7 +24,7 @@ export interface Pass {
   status: RegistrationStatus
   eventId: string
   eventTitle: string
-  eventStartsAt: string // ISO 8601
+  eventStartsAt: string
   eventLocation: string
   attendeeName: string
 }

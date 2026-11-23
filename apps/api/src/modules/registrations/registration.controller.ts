@@ -42,3 +42,8 @@ export const listEventRegistrations = async (request: Request<{ id: string }>, r
     if (!handleError(error, response)) throw error
   }
 }
+
+export const getPass = async (request: Request<{ id: string }>, response: Response) => {
+  const data = await registrationService.getPass(request.params.id, request.auth!.sub)
+  response.json({ data })
+}

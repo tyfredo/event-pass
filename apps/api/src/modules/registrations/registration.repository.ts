@@ -56,4 +56,11 @@ export const registrationRepository = {
     const doc = await events.doc(eventId).get()
     return doc.exists ? doc.data()?.organizerId : null
   },
+  async findById(id: string): Promise<Registration | null> {
+    const doc = await registrations.doc(id).get()
+    return doc.exists ? {
+      id: doc.id,
+      ...(doc.data() as Omit<Registration, 'id'>)
+    } : null
+  }
 }
