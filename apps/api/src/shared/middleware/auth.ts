@@ -114,7 +114,7 @@ export async function authenticate(
 ): Promise<void> {
   const match = /^Bearer\s+(\S+)$/i.exec(req.headers.authorization ?? '');
   if (!match?.[1]) {
-    throw new AppError(401, 'UNAUTHENTICATED', 'Header Authorization con formato Bearer <token> requerido.');
+    throw new AppError(401, 'UNAUTHORIZED', 'Header Authorization con formato Bearer <token> requerido.');
   }
 
   req.user = await resolveUser(match[1]);
@@ -127,7 +127,7 @@ export const requireAuth = authenticate;
 export function requireRole(...allowedRoles: UserRole[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {
-      throw new AppError(401, 'UNAUTHENTICATED', 'Autenticación requerida.');
+      throw new AppError(401, 'UNAUTHORIZED', 'Autenticación requerida.');
     }
 
     if (!req.user.role || !allowedRoles.includes(req.user.role)) {

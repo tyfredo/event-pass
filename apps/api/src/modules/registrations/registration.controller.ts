@@ -22,7 +22,7 @@ export const createRegistration = async (request: Request, response: Response) =
   const input = createRegistrationSchema.parse(request.body)
 
   try {
-    const data = await registrationService.create(input.eventId, request.auth!.sub)
+    const data = await registrationService.create(input.eventId, request.user!.uid)
     response.status(201).json({ data })
   } catch (error) {
     if (!handleError(error, response)) throw error
@@ -30,13 +30,13 @@ export const createRegistration = async (request: Request, response: Response) =
 }
 
 export const listMyRegistrations = async (request: Request, response: Response) => {
-  const data = await registrationService.listMine(request.auth!.sub)
+  const data = await registrationService.listMine(request.user!.uid)
   response.json({ data })
 }
 
 export const listEventRegistrations = async (request: Request<{ id: string }>, response: Response) => {
   try {
-    const data = await registrationService.listByEvent(request.params.id, request.auth!.sub)
+    const data = await registrationService.listByEvent(request.params.id, request.user!.uid)
     response.json({ data })
   } catch (error) {
     if (!handleError(error, response)) throw error
