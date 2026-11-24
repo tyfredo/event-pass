@@ -3,6 +3,7 @@ import { copyFolio, downloadQr, printPass } from '~/utils/passActions'
 
 const props = defineProps<{
   folio: string
+  qrValue?: string
 }>()
 
 const message = ref('')
@@ -19,7 +20,7 @@ const handleDownload = async () => {
   clearMessages()
 
   try {
-    await downloadQr(props.folio)
+    await downloadQr(props.folio, props.qrValue || props.folio)
   } catch {
     errorMessage.value = 'No se pudo descargar el QR.'
   }

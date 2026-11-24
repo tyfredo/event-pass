@@ -1,8 +1,8 @@
 import QRCode from 'qrcode'
 
-export const downloadQr = async (folio: string) => {
+export const downloadQr = async (folio: string, value: string = folio) => {
   const link = document.createElement('a')
-  link.href = await QRCode.toDataURL(folio, { width: 512, margin: 2 })
+  link.href = await QRCode.toDataURL(value, { width: 512, margin: 4, errorCorrectionLevel: 'M' })
   link.download = `${folio}.png`
   link.click()
 }
