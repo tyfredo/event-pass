@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import RegistrationCard from '~/components/registrations/RegistrationCard.vue'
+import { computed, onMounted, ref } from 'vue'
+import PassTicket from '~/components/pass/PassTicket.vue'
+import { getErrorMessage, useRegistrations } from '~/composables/useRegistrations'
+import { useAuthStore } from '~/stores/auth'
 import { useEventsStore } from '~/stores/events'
 import type { Registration } from '~/types/registration'
+import { toPass } from '~/utils/pass'
 
 definePageMeta({ middleware: 'attendee' })
 
 const route = useRoute()
 const eventId = String(route.params.id)
 const eventsStore = useEventsStore()
-const { register } = useRegistrations()
+const auth = useAuthStore()
+const { register, listMine } = useRegistrations()
 
 const { data: event, refresh } = useAsyncData(`event-${eventId}`, () => eventsStore.fetchEventById(eventId), {
   server: false,
@@ -17,6 +22,19 @@ const { data: event, refresh } = useAsyncData(`event-${eventId}`, () => eventsSt
 const registration = ref<Registration | null>(null)
 const errorMessage = ref('')
 const loading = ref(false)
+
+const pass = computed(() => (registration.value ? toPass(registration.value, event.value ?? undefined, auth.user?.name) : null))
+
+// Si el asistente ya estaba inscrito a este evento, se le muestra su boleto en lugar del botón.
+onMounted(async () => {
+  try {
+    const mine = await listMine()
+    const existing = mine.find((item) => item.eventId === eventId && item.status === 'active')
+    if (existing && !registration.value) registration.value = existing
+  } catch {
+    // Si falla, se queda el botón de inscripción.
+  }
+})
 
 const canRegister = computed(() => event.value?.status === 'open' && event.value.availableSeats > 0)
 
@@ -58,7 +76,7 @@ const handleRegister = async () => {
           </p>
         </section>
 
-        <RegistrationCard v-if="registration" :registration="registration" />
+          <PassTicket v-if="pass" :pass="pass" />
 
         <template v-else>
           <p

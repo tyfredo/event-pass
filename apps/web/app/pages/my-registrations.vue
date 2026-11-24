@@ -1,13 +1,32 @@
 <script setup lang="ts">
-import RegistrationCard from '~/components/registrations/RegistrationCard.vue'
+import { computed } from 'vue'
+import PassTicket from '~/components/pass/PassTicket.vue'
+import { getErrorMessage, useRegistrations } from '~/composables/useRegistrations'
+import { useAuthStore } from '~/stores/auth'
+import { useEventsStore } from '~/stores/events'
+import { toPass } from '~/utils/pass'
 
 definePageMeta({ middleware: 'attendee' })
 
 const { listMine } = useRegistrations()
+const eventsStore = useEventsStore()
+const auth = useAuthStore()
 
-const { data: registrations, error } = useAsyncData('my-registrations', listMine, {
+const { data: registrations, error } = useAsyncData(
+  'my-registrations',
+  async () => {
+    // Los eventos se piden junto con las inscripciones para mostrar fecha y lugar en cada boleto.
+    const [mine] = await Promise.all([listMine(), eventsStore.fetchEvents()])
+    return mine
+  },
+  {
   server: false,
   default: () => [],
+})
+
+const passes = computed(() => {
+  const events = new Map(eventsStore.events.map((event) => [event.id, event]))
+  return registrations.value.map((registration) => toPass(registration, events.get(registration.eventId), auth.user?.name))
 })
 </script>
 
