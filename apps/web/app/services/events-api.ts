@@ -1,9 +1,11 @@
+import type { ApiRequestOptions, ApiResponse } from '~/types';
 import type {
   CreateEventPayload,
   EventItem,
   EventStatus,
   UpdateEventPayload,
 } from '~/types/events';
+import { ApiRequestError, translateApiError } from '~/utils/apiErrors';
 
 export class EventsApiError extends Error {
   public readonly status: number;
@@ -52,6 +54,41 @@ async function handleResponse<T>(res: Response): Promise<T> {
   }
 
   return (body?.data !== undefined ? body.data : body) as T;
+}
+
+type ApiClient = <T>(url: string, options?: ApiRequestOptions) => Promise<T>;
+
+function toEventsApiError(err: unknown): unknown {
+  if (!(err instanceof ApiRequestError)) return err;
+  const backend = err.data?.error;
+  const known = translateApiError(err.code) !== translateApiError(undefined);
+  const message = known ? err.message : backend?.message || err.message;
+  return new EventsApiError(err.statusCode, message, err.code || undefined, backend?.details);
+}
+
+export function createClientEventsApi(request: ApiClient): EventsApi {
+  async function call<T>(url: string, options?: ApiRequestOptions): Promise<T> {
+    try {
+      const body = await request<ApiResponse<T>>(url, options);
+      return body.data;
+    } catch (err) {
+      throw toEventsApiError(err);
+    }
+  }
+
+  return {
+    list: (status) => call<EventItem[]>('/events', status ? { query: { status } } : undefined),
+    getById: (id) => call<EventItem>(`/events/${encodeURIComponent(id)}`),
+    listMine: () => call<EventItem[]>('/events/mine'),
+    create: (payload) => call<EventItem>('/events', { method: 'POST', body: { ...payload } }),
+    update: (id, payload) =>
+      call<EventItem>(`/events/${encodeURIComponent(id)}`, { method: 'PATCH', body: { ...payload } }),
+    setStatus: (id, newStatus) =>
+      call<EventItem>(`/events/${encodeURIComponent(id)}/status`, {
+        method: 'PATCH',
+        body: { status: newStatus },
+      }),
+  };
 }
 
 export function createHttpEventsApi(config: HttpEventsApiConfig): EventsApi {

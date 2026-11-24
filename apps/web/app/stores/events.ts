@@ -2,7 +2,7 @@ import { reactive, ref, type Ref } from 'vue';
 import { defineStore } from 'pinia';
 import { useAuthStore } from '~/stores/auth';
 import {
-  createHttpEventsApi,
+  createClientEventsApi,
   EventsApiError,
 } from '~/services/events-api';
 import type {
@@ -33,7 +33,6 @@ function replaceById(list: Ref<EventItem[]>, updated: EventItem): void {
 
 export const useEventsStore = defineStore('events', () => {
   const auth = useAuthStore();
-  const config = useRuntimeConfig();
 
   const events = ref<EventItem[]>([]);
   const myEvents = ref<EventItem[]>([]);
@@ -46,14 +45,7 @@ export const useEventsStore = defineStore('events', () => {
   const loaded = reactive({ list: false, mine: false });
   const pendingStatusId = ref<string | null>(null);
 
-  const api = createHttpEventsApi({
-    baseUrl: () => String(config.public.apiBase),
-    authHeader: async (): Promise<Record<string, string>> => {
-      const token = await auth.getToken();
-      if (!token) return {};
-      return { Authorization: `Bearer ${token}` };
-    },
-  });
+  const api = createClientEventsApi(useApi());
 
   // Contadores de petición: solo la última respuesta puede escribir en el estado.
   let listSeq = 0;
