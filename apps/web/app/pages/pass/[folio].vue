@@ -33,8 +33,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-slate-50">
-    <div class="mx-auto max-w-md space-y-4 px-6 py-10">
+  <div>
+    <div class="mx-auto max-w-md space-y-4">
       <p class="text-xs font-black uppercase tracking-widest text-indigo-600">Pase de acceso</p>
 
       <p v-if="loading" class="text-slate-500">Cargando datos del evento...</p>
@@ -73,5 +73,5 @@ onMounted(async () => {
         </dl>
       </section>
     </div>
-  </main>
+  </div>
 </template>

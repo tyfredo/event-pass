@@ -52,7 +52,7 @@ async function handleSubmit() {
       <NuxtLink to="/organizer/events" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">
         ← Volver a Mis Eventos
       </NuxtLink>
-      <h1 class="mt-2 text-2xl font-bold text-slate-900">Crear Nuevo Evento</h1>
+      <h1 class="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Crear Nuevo Evento</h1>
       <p class="text-sm text-slate-600">
         Completa los datos para publicar el evento con estado inicial abierto.
       </p>

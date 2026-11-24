@@ -26,7 +26,7 @@ watch(() => auth.user?.uid, loadMyEvents);
   <section>
     <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Mis Eventos</h1>
+        <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Mis Eventos</h1>
         <p class="text-sm text-slate-600">
           Gestionando eventos de <strong>{{ auth.user?.name ?? 'Organizador' }}</strong>
         </p>
@@ -48,7 +48,11 @@ watch(() => auth.user?.uid, loadMyEvents);
       {{ eventsStore.error }}
     </div>
 
-    <div v-if="eventsStore.loading.mine || !eventsStore.loaded.mine" class="py-12 text-center text-sm text-slate-500">
+    <div
+      v-if="eventsStore.loading.mine || !eventsStore.loaded.mine"
+      class="flex flex-col items-center gap-3 py-16 text-sm font-medium text-slate-500"
+    >
+      <span class="text-indigo-600"><UiSpinner size="lg" label="Cargando tus eventos..." /></span>
       Cargando tus eventos...
     </div>
 

@@ -36,7 +36,7 @@ watch(selectedFilter, loadEvents);
 
     <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Eventos Disponibles</h1>
+        <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Eventos Disponibles</h1>
         <p class="text-sm text-slate-600">
           Explora los próximos eventos y consulta la disponibilidad de lugares.
         </p>
@@ -70,7 +70,11 @@ watch(selectedFilter, loadEvents);
     </div>
 
     <!-- `loaded` evita mostrar "vacío" antes de la primera carga (también en SSR) -->
-    <div v-if="eventsStore.loading.list || !eventsStore.loaded.list" class="py-12 text-center text-sm text-slate-500">
+    <div
+      v-if="eventsStore.loading.list || !eventsStore.loaded.list"
+      class="flex flex-col items-center gap-3 py-16 text-sm font-medium text-slate-500"
+    >
+      <span class="text-indigo-600"><UiSpinner size="lg" label="Cargando catálogo de eventos..." /></span>
       Cargando catálogo de eventos...
     </div>
 

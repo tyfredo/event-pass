@@ -1,9 +1,32 @@
 @import "tailwindcss";
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+
+  ::selection {
+    @apply bg-indigo-100 text-indigo-900;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-indigo-500;
+  }
+}
+
 @media print {
   /* Menú principal y botones: solo se imprime el boleto. */
   header:has(> nav),
+  footer,
   .no-print {
     display: none !important;
+  }
+
+  body {
+    background: #ffffff;
   }
 }

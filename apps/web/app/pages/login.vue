@@ -39,9 +39,9 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="mx-auto flex max-w-md flex-col gap-6 px-6 py-12">
+  <div class="mx-auto flex max-w-md flex-col gap-6 sm:py-6">
     <div class="space-y-1 text-center">
-      <h1 class="text-3xl font-black text-slate-900">Iniciar sesión</h1>
+      <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Iniciar sesión</h1>
       <p class="text-sm text-slate-600">Entra para ver tus eventos e inscripciones.</p>
     </div>
 

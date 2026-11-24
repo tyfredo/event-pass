@@ -69,9 +69,9 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="mx-auto flex max-w-md flex-col gap-6 px-6 py-12">
+  <div class="mx-auto flex max-w-md flex-col gap-6 sm:py-6">
     <div class="space-y-1 text-center">
-      <h1 class="text-3xl font-black text-slate-900">Crear cuenta</h1>
+      <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Crear cuenta</h1>
       <p class="text-sm text-slate-600">Elige tu rol para ver las opciones que te corresponden.</p>
     </div>
 

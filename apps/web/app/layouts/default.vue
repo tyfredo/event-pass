@@ -27,6 +27,16 @@ const links = computed<NavLink[]>(() => {
 
 const roleLabel = computed(() => (auth.isOrganizer ? 'Organizador' : 'Asistente'))
 
+const initials = computed(() => {
+  const parts = (auth.user?.name ?? '').trim().split(/\s+/).filter(Boolean)
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0]!.toUpperCase())
+    .join('')
+})
+
+const year = new Date().getFullYear()
+
 watch(
   () => route.fullPath,
   () => {
@@ -46,10 +56,18 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 text-slate-900">
-    <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3" aria-label="Principal">
-        <NuxtLink to="/" class="text-lg font-black tracking-tight text-indigo-600">EventPass</NuxtLink>
+  <div class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 shadow-sm shadow-slate-900/[0.03] backdrop-blur">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6" aria-label="Principal">
+        <NuxtLink to="/" class="flex items-center gap-2 text-lg font-black tracking-tight text-indigo-600">
+          <span
+            aria-hidden="true"
+            class="grid h-8 w-8 place-items-center rounded-lg bg-indigo-600 text-xs font-black text-white shadow-sm shadow-indigo-600/30"
+          >
+            EP
+          </span>
+          EventPass
+        </NuxtLink>
 
         <button
           type="button"
@@ -82,6 +100,12 @@ async function handleLogout() {
           <div v-if="auth.ready" class="flex flex-col gap-3 md:flex-row md:items-center">
             <template v-if="auth.isAuthenticated">
               <div class="flex items-center gap-2 text-sm">
+                <span
+                  aria-hidden="true"
+                  class="grid h-8 w-8 place-items-center rounded-full bg-slate-100 text-xs font-bold text-slate-600 ring-1 ring-slate-200"
+                >
+                  {{ initials }}
+                </span>
                 <span class="font-semibold text-slate-800">{{ auth.user?.name }}</span>
                 <UiBadge :variant="auth.isOrganizer ? 'info' : 'success'">{{ roleLabel }}</UiBadge>
               </div>
@@ -96,8 +120,15 @@ async function handleLogout() {
       </nav>
     </header>
 
-    <main>
+    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
       <slot />
     </main>
+
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:px-6">
+        <p><span class="font-bold text-indigo-600">EventPass</span> · Gestión de eventos e inscripciones</p>
+        <p>&copy; {{ year }}</p>
+      </div>
+    </footer>
   </div>
 </template>

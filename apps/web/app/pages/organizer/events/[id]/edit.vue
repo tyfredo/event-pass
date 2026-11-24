@@ -95,7 +95,7 @@ async function handleSubmit() {
       <NuxtLink to="/organizer/events" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">
         ← Volver a Mis Eventos
       </NuxtLink>
-      <h1 class="mt-2 text-2xl font-bold text-slate-900">Editar Evento</h1>
+      <h1 class="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Editar Evento</h1>
     </div>
 
     <div v-if="!ready || eventsStore.loading.detail" class="py-12 text-center text-sm text-slate-500">
