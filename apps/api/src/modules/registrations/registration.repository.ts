@@ -1,6 +1,6 @@
 import { FieldValue } from 'firebase-admin/firestore'
 import { db } from '../../config/firebase.js'
-import { checkCanRegister, generateFolio } from './registration.rules.js'
+import { checkCanCancel, checkCanRegister, generateFolio } from './registration.rules.js'
 import type { EventForRegistration, Registration } from './registration.types.js'
 
 const registrations = db.collection('registrations')
@@ -21,13 +21,14 @@ export const registrationRepository = {
       ])
 
       const event = eventDoc.exists ? (eventDoc.data() as EventForRegistration) : null
-      checkCanRegister(event, registrationDoc.exists)
+      const alreadyActive = registrationDoc.exists && registrationDoc.data()?.status !== 'cancelled'
+      checkCanRegister(event, alreadyActive)
 
       const user = userDoc.data()
       const data: Omit<Registration, 'id'> = {
         eventId,
         attendeeId,
-        attendeeName: user?.fullName ?? '',
+        attendeeName: user?.name ?? '',
         attendeeEmail: user?.email ?? '',
         eventTitle: eventDoc.data()?.title ?? '',
         folio: generateFolio(),
@@ -56,6 +57,29 @@ export const registrationRepository = {
     const doc = await events.doc(eventId).get()
     return doc.exists ? doc.data()?.organizerId : null
   },
+  async cancel(id: string, attendeeId: string): Promise<Registration> {
+    return db.runTransaction(async transaction => {
+      const registrationRef = registrations.doc(id)
+      const registrationDoc = await transaction.get(registrationRef)
+      const current = registrationDoc.exists
+        ? ({ id: registrationDoc.id, ...(registrationDoc.data() as Omit<Registration, 'id'>) })
+        : null
+
+      checkCanCancel(current, attendeeId)
+
+      const eventRef = events.doc(current!.eventId)
+      const eventDoc = await transaction.get(eventRef)
+      const cancelledAt = new Date().toISOString()
+
+      transaction.update(registrationRef, { status: 'cancelled', cancelledAt })
+      if (eventDoc.exists && (eventDoc.data()?.registeredCount ?? 0) > 0) {
+        transaction.update(eventRef, { registeredCount: FieldValue.increment(-1) })
+      }
+
+      return { ...current!, status: 'cancelled' }
+    })
+  },
+
   async findById(id: string): Promise<Registration | null> {
     const doc = await registrations.doc(id).get()
     return doc.exists ? {

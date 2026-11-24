@@ -13,6 +13,10 @@ export const registrationService = {
     return registrationRepository.listByAttendee(attendeeId)
   },
 
+  cancel(id: string, attendeeId: string) {
+    return registrationRepository.cancel(id, attendeeId)
+  },
+
   async listByEvent(eventId: string, organizerId: string) {
     const ownerId = await registrationRepository.findEventOrganizer(eventId)
     if (!ownerId) throw new Error('EVENT_NOT_FOUND')

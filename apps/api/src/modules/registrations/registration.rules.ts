@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto'
-import type { EventForRegistration } from './registration.types.js'
+import type { EventForRegistration, RegistrationStatus } from './registration.types.js'
 import { AppError } from '../../shared/errors.js'
 
 export const checkCanRegister = (
@@ -21,5 +21,18 @@ export const generateFolio = () => {
 export function assertOwner(registration: { attendeeId: string }, uid: string) {
   if (registration.attendeeId !== uid) {
     throw AppError.forbidden('Esta inscripción no te pertenece', 'NOT_REGISTRATION_OWNER')
+  }
+}
+
+export function checkCanCancel(
+  registration: { attendeeId: string; status: RegistrationStatus } | null,
+  uid: string,
+) {
+  if (!registration) {
+    throw new AppError(404, 'REGISTRATION_NOT_FOUND', 'La inscripción no existe')
+  }
+  assertOwner(registration, uid)
+  if (registration.status === 'cancelled') {
+    throw new AppError(409, 'ALREADY_CANCELLED', 'La inscripción ya estaba cancelada')
   }
 }

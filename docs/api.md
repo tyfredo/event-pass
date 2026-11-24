@@ -11,7 +11,8 @@ Rutas protegidas: header `Authorization: Bearer <token de Firebase>` (en desarro
 |---|---|---|---|
 | POST | `/registrations` | attendee | `201 { data: Registration }` |
 | GET | `/registrations/me` | attendee | `200 { data: Registration[] }` |
-| GET | `/events/:id/registrations` | organizer (dueño) | `200 { data: Registration[] }` |
+| GET | `/registrations/:id` | attendee (dueño) | `200 { data: Pass }` |
+| PATCH | `/registrations/:id/cancel` | attendee (dueño) | `200 { data: Registration }` |
 | GET | `/events/:id/registrations` | organizer (dueño) | `200 { data: Registration[] }` |
 
 **POST /registrations** — body `{ "eventId": "abc123" }`
@@ -70,6 +71,38 @@ Errores (`{ "error": { "code", "message" } }`):
 | `NOT_REGISTRATION_OWNER` | 403 | La inscripción es de otro usuario |
 | `REGISTRATION_NOT_FOUND` | 404 | No existe la inscripción |
 | `EVENT_NOT_FOUND` | 404 | El evento de la inscripción ya no existe |
+
+---
+
+**PATCH /registrations/:id/cancel** — cancela una inscripción propia. Sin body.
+
+En una sola transacción pasa la inscripción a `cancelled`, guarda `cancelledAt` y resta 1 a `registeredCount` del evento (nunca por debajo de 0), así el lugar queda libre. Después de cancelar, el asistente puede volver a inscribirse al mismo evento y recibe un folio nuevo.
+
+```json
+{
+  "data": {
+    "id": "abc123_uidAna",
+    "eventId": "abc123",
+    "attendeeId": "uidAna",
+    "attendeeName": "ana",
+    "attendeeEmail": "ana@test.com",
+    "eventTitle": "Evento de prueba",
+    "folio": "EVP-2026-A3F9C1",
+    "status": "cancelled",
+    "createdAt": "2026-11-15T19:20:11.000Z"
+  }
+}
+```
+
+Errores (`{ "error": { "code", "message" } }`):
+
+| Código | HTTP | Cuándo |
+|---|---|---|
+| `UNAUTHORIZED` | 401 | Sin token o token inválido |
+| `FORBIDDEN` | 403 | El rol no es `attendee` |
+| `NOT_REGISTRATION_OWNER` | 403 | La inscripción es de otro usuario |
+| `REGISTRATION_NOT_FOUND` | 404 | No existe la inscripción |
+| `ALREADY_CANCELLED` | 409 | La inscripción ya estaba cancelada |
 
 > Nota: estos errores se unificarán al formato `{ error: { code, message } }` en `fix/auth-errors`.
 
