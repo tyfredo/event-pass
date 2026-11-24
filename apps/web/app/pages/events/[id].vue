@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import PassTicket from '~/components/pass/PassTicket.vue'
-import { getErrorMessage, useRegistrations } from '~/composables/useRegistrations'
+import { getErrorMessage, passPath, useRegistrations } from '~/composables/useRegistrations'
 import { useAuthStore } from '~/stores/auth'
 import { useEventsStore } from '~/stores/events'
 import type { Registration } from '~/types/registration'
@@ -15,7 +15,7 @@ const eventsStore = useEventsStore()
 const auth = useAuthStore()
 const { register, listMine } = useRegistrations()
 
-const { data: event, refresh } = useAsyncData(`event-${eventId}`, () => eventsStore.fetchEventById(eventId), {
+const { data: event, refresh, status: eventStatus } = useAsyncData(`event-${eventId}`, () => eventsStore.fetchEventById(eventId), {
   server: false,
 })
 
@@ -57,50 +57,67 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-slate-50">
-    <div class="mx-auto max-w-2xl space-y-6 px-6 py-10">
-      <p v-if="eventsStore.loading.detail && !event" class="text-slate-500">Cargando evento...</p>
+  <div>
+    <div class="mx-auto max-w-2xl space-y-6">
+      <NuxtLink to="/events" class="inline-flex text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+        &larr; Volver a eventos
+      </NuxtLink>
 
-      <p v-else-if="!event" class="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+      <div
+        v-if="!event && (eventStatus === 'idle' || eventStatus === 'pending' || eventsStore.loading.detail)"
+        class="flex flex-col items-center gap-3 py-16 text-sm font-medium text-slate-500"
+      >
+        <span class="text-indigo-600"><UiSpinner size="lg" label="Cargando evento..." /></span>
+        Cargando evento...
+      </div>
+
+      <UiAlert v-else-if="!event" variant="error">
         {{ eventsStore.error ?? 'El evento no existe.' }}
-      </p>
+      </UiAlert>
 
       <template v-else>
-        <section class="space-y-2 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h1 class="text-3xl font-black text-slate-900">{{ event.title }}</h1>
-          <p class="text-slate-600">{{ event.description }}</p>
-          <p class="text-sm text-slate-500"><strong>Fecha:</strong> {{ formatDate(event.startsAt) }}</p>
-          <p class="text-sm text-slate-500"><strong>Lugar:</strong> {{ event.location || 'Por definir' }}</p>
-          <p class="text-sm text-slate-500">
-            <strong>Lugares disponibles:</strong> {{ event.availableSeats }} / {{ event.capacity }}
-          </p>
+        <section class="space-y-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <div class="flex items-start justify-between gap-3">
+            <h1 class="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{{ event.title }}</h1>
+            <UiBadge :variant="event.status === 'open' ? 'success' : 'danger'" class="mt-1 shrink-0">
+              {{ event.status === 'open' ? 'Abierto' : 'Cerrado' }}
+            </UiBadge>
+          </div>
+          <p v-if="event.description" class="text-slate-600">{{ event.description }}</p>
+          <dl class="grid gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl bg-slate-50 px-4 py-3">
+              <dt class="text-xs font-bold uppercase tracking-wide text-slate-500">Fecha</dt>
+              <dd class="mt-1 text-sm font-semibold text-slate-900">{{ formatDate(event.startsAt) }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 px-4 py-3">
+              <dt class="text-xs font-bold uppercase tracking-wide text-slate-500">Lugar</dt>
+              <dd class="mt-1 text-sm font-semibold text-slate-900">{{ event.location || 'Por definir' }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 px-4 py-3">
+              <dt class="text-xs font-bold uppercase tracking-wide text-slate-500">Lugares disponibles</dt>
+              <dd class="mt-1 text-sm font-semibold text-slate-900">{{ event.availableSeats }} / {{ event.capacity }}</dd>
+            </div>
+          </dl>
         </section>
 
-          <PassTicket v-if="pass" :pass="pass" />
+        <template v-if="pass && registration">
+          <UiAlert variant="success" title="¡Ya estás inscrito!">
+            Guarda tu folio o abre tu pase para descargar el QR o imprimirlo.
+          </UiAlert>
+          <PassTicket :pass="pass" />
+          <UiButton :to="passPath(registration.id)" block data-testid="view-pass">Ver pase</UiButton>
+        </template>
 
         <template v-else>
-          <p
-            v-if="errorMessage"
-            class="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
-          >
-            {{ errorMessage }}
-          </p>
+          <UiAlert v-if="errorMessage" variant="error">{{ errorMessage }}</UiAlert>
 
-          <button
-            v-if="canRegister"
-            type="button"
-            :disabled="loading"
-            class="rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white transition hover:bg-indigo-700 disabled:opacity-60"
-            @click="handleRegister"
-          >
+          <UiButton v-if="canRegister" size="lg" block :loading="loading" @click="handleRegister">
             {{ loading ? 'Inscribiendo...' : 'Inscribirme' }}
-          </button>
+          </UiButton>
 
-          <p v-else class="text-sm font-semibold text-slate-500">
-            Este evento ya no acepta inscripciones.
-          </p>
+          <UiAlert v-else variant="warning">Este evento ya no acepta inscripciones.</UiAlert>
         </template>
       </template>
     </div>
-  </main>
+  </div>
 </template>

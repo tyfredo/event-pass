@@ -5,6 +5,7 @@ import type {
   UserProfile,
 } from '~/types'
 import type { EventItem, EventStatus } from '~/types/events'
+import type { Pass } from '~/types/pass'
 import type { Registration } from '~/types/registration'
 import { ApiRequestError } from '~/utils/apiErrors'
 
@@ -276,15 +277,37 @@ function cancelRegistration(user: UserProfile, registrationId: string) {
   if (registration.attendeeId !== user.uid) {
     throw new ApiRequestError(403, 'NOT_REGISTRATION_OWNER')
   }
-  if (registration.status === 'active') {
-    registration.status = 'cancelled'
-    const event = events.find((item) => item.id === registration.eventId)
-    if (event) {
-      event.registeredCount = Math.max(event.registeredCount - 1, 0)
-      refreshSeats(event)
-    }
+  if (registration.status === 'cancelled') {
+    throw new ApiRequestError(409, 'ALREADY_CANCELLED')
+  }
+  registration.status = 'cancelled'
+  const event = events.find((item) => item.id === registration.eventId)
+  if (event) {
+    event.registeredCount = Math.max(event.registeredCount - 1, 0)
+    refreshSeats(event)
   }
   return registration
+}
+
+function getPass(user: UserProfile, registrationId: string): Pass {
+  const registration = registrations.find((item) => item.id === registrationId)
+  if (!registration) {
+    throw new ApiRequestError(404, 'REGISTRATION_NOT_FOUND')
+  }
+  if (registration.attendeeId !== user.uid) {
+    throw new ApiRequestError(403, 'NOT_REGISTRATION_OWNER')
+  }
+  const event = findEvent(registration.eventId)
+  return {
+    id: registration.id,
+    folio: registration.folio,
+    status: registration.status,
+    eventId: event.id,
+    eventTitle: event.title,
+    eventStartsAt: event.startsAt,
+    eventLocation: event.location,
+    attendeeName: registration.attendeeName,
+  }
 }
 
 function byDate<T extends { startsAt?: string; createdAt: string }>(a: T, b: T) {
@@ -348,6 +371,10 @@ function resolve(path: string, method: string, options: ApiRequestOptions, token
     if (method === 'PATCH' && id && action === 'cancel') {
       const user = requireUser(token, 'attendee')
       return cancelRegistration(user, id)
+    }
+    if (method === 'GET' && id && !action) {
+      const user = requireUser(token, 'attendee')
+      return getPass(user, decodeURIComponent(id))
     }
   }
 

@@ -1,32 +1,20 @@
+import type { ApiResponse } from '~/types'
+import type { Pass } from '~/types/pass'
 import type { Registration } from '~/types/registration'
+import { ApiRequestError, toApiRequestError } from '~/utils/apiErrors'
 
-interface RegistrationResponse {
-  data: Registration
+export const getErrorMessage = (error: unknown): string => {
+  const cause = (error as { cause?: unknown } | null)?.cause
+  return toApiRequestError(cause instanceof ApiRequestError ? cause : error).message
 }
 
-interface RegistrationsResponse {
-  data: Registration[]
-}
-
-const messages: Record<string, string> = {
-  EVENT_NOT_FOUND: 'El evento no existe.',
-  EVENT_CLOSED: 'El evento está cerrado y no acepta inscripciones.',
-  EVENT_FULL: 'El evento ya no tiene lugares disponibles.',
-  ALREADY_REGISTERED: 'Ya estás inscrito en este evento.',
-  NOT_EVENT_OWNER: 'Solo el organizador del evento puede ver sus inscritos.',
-  Unauthorized: 'Debes iniciar sesión.',
-  'Invalid or expired token': 'Tu sesión expiró, vuelve a iniciar sesión.',
-  Forbidden: 'Tu rol no tiene permiso para esta acción.',
-}
-
-export const getErrorMessage = (error: any) =>
-  messages[error?.data?.message] ?? 'No se pudo completar la operación.'
+export const passPath = (registrationId: string) => `/registrations/${encodeURIComponent(registrationId)}/pass`
 
 export const useRegistrations = () => {
   const api = useApi()
 
   const register = async (eventId: string) => {
-    const response = await api<RegistrationResponse>('/registrations', {
+    const response = await api<ApiResponse<Registration>>('/registrations', {
       method: 'POST',
       body: { eventId },
     })
@@ -34,14 +22,27 @@ export const useRegistrations = () => {
   }
 
   const listMine = async () => {
-    const response = await api<RegistrationsResponse>('/registrations/me')
+    const response = await api<ApiResponse<Registration[]>>('/registrations/me')
     return response.data
   }
 
   const listByEvent = async (eventId: string) => {
-    const response = await api<RegistrationsResponse>(`/events/${eventId}/registrations`)
+    const response = await api<ApiResponse<Registration[]>>(`/events/${encodeURIComponent(eventId)}/registrations`)
     return response.data
   }
 
-  return { register, listMine, listByEvent }
+  const getPass = async (registrationId: string) => {
+    const response = await api<ApiResponse<Pass>>(`/registrations/${encodeURIComponent(registrationId)}`)
+    return response.data
+  }
+
+  const cancel = async (registrationId: string) => {
+    const response = await api<ApiResponse<Registration>>(
+      `/registrations/${encodeURIComponent(registrationId)}/cancel`,
+      { method: 'PATCH' },
+    )
+    return response.data
+  }
+
+  return { register, listMine, listByEvent, getPass, cancel }
 }
