@@ -44,6 +44,6 @@ export const listEventRegistrations = async (request: Request<{ id: string }>, r
 }
 
 export const getPass = async (request: Request<{ id: string }>, response: Response) => {
-  const data = await registrationService.getPass(request.params.id, request.auth!.sub)
+  const data = await registrationService.getPass(request.params.id, request.user!.uid)
   response.json({ data })
 }
